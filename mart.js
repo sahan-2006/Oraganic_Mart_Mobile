@@ -11,8 +11,22 @@ const backToLoginBtn = document.getElementById('back-to-login');
 const successModal = document.getElementById('success-modal');
 const resetSuccessModal = document.getElementById('reset-success-modal');
 
+// Feedback System DOM Elements
+const marqueeBtn = document.getElementById('feedbackBtnMarquee');
+const feedbackModal = document.getElementById('feedbackModal');
+const closeModalBtn = document.getElementById('closeModal');
+const feedbackForm = document.getElementById('feedbackForm');
+const feedbackSuccess = document.getElementById('feedbackSuccess');
+const closeSuccessBtn = document.getElementById('closeSuccess');
+const messageTextarea = document.getElementById('message');
+const charCount = document.getElementById('charCount');
+const ratingButtons = document.querySelectorAll('.rating-btn');
+const ratingInput = document.getElementById('rating');
+const feedbackType = document.getElementById('feedbackType');
+const submitBtn = document.getElementById('submitFeedback');
+
 // ====== STATE MANAGEMENT ======
-let currentTab = 'username';
+let currentTab = 'username'; // Changed default to 'username'
 let resetStep = 1;
 let otpTimer = null;
 let otpTimeLeft = 120; // 2 minutes in seconds
@@ -1462,6 +1476,9 @@ document.addEventListener('DOMContentLoaded', function() {
         addToastStyles();
         addNotificationStyles();
         
+        // Add CSS fixes
+        addScrollFixStyles();
+        
         console.log('Initialization complete');
     }
 
@@ -1471,14 +1488,27 @@ document.addEventListener('DOMContentLoaded', function() {
         const tabContents = document.querySelectorAll('.tab-content');
         
         tabBtns.forEach(btn => {
+            // Remove any existing event listeners
+            const newBtn = btn.cloneNode(true);
+            btn.parentNode.replaceChild(newBtn, btn);
+        });
+        
+        // Re-select after cloning
+        document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const tabName = this.getAttribute('data-tab');
                 switchTab(tabName);
             });
         });
+        
+        // FIX: Set default tab to username
+        switchTab('username');
     }
 
     function switchTab(tabName) {
+        // Update currentTab variable
+        currentTab = tabName;
+        
         // Update active tab button
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
@@ -1494,8 +1524,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 content.classList.add('active');
             }
         });
-        
-        currentTab = tabName;
         
         // Clear previous errors
         clearErrors();
@@ -1589,42 +1617,75 @@ document.addEventListener('DOMContentLoaded', function() {
     // ====== EVENT LISTENERS ======
     function attachEventListeners() {
         // Page Navigation
-        showSignupLink.addEventListener('click', showSignupPage);
-        showLoginLink.addEventListener('click', showLoginPage);
+        if (showSignupLink) {
+            showSignupLink.addEventListener('click', showSignupPage);
+        }
+        
+        if (showLoginLink) {
+            showLoginLink.addEventListener('click', showLoginPage);
+        }
         
         // Form Submissions
-        loginForm.addEventListener('submit', handleLogin);
-        signupForm.addEventListener('submit', handleSignup);
+        if (loginForm) {
+            loginForm.addEventListener('submit', handleLogin);
+        }
+        
+        if (signupForm) {
+            signupForm.addEventListener('submit', handleSignup);
+        }
         
         // Forgot Password
-        forgotPasswordLinks.forEach(link => {
-            link.addEventListener('click', showResetPassword);
-        });
+        if (forgotPasswordLinks.length > 0) {
+            forgotPasswordLinks.forEach(link => {
+                link.addEventListener('click', showResetPassword);
+            });
+        }
         
         // Back to Login
-        backToLoginBtn.addEventListener('click', showLoginForm);
+        if (backToLoginBtn) {
+            backToLoginBtn.addEventListener('click', showLoginForm);
+        }
         
         // Reset Password Steps - Fixed: Use proper event listeners
-        document.getElementById('reset-form-step1').addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleResetStep1(e);
-        });
-        document.getElementById('reset-form-step2').addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleResetStep2(e);
-        });
-        document.getElementById('reset-form-step3').addEventListener('submit', function(e) {
-            e.preventDefault();
-            handleResetStep3(e);
-        });
+        const resetFormStep1 = document.getElementById('reset-form-step1');
+        const resetFormStep2 = document.getElementById('reset-form-step2');
+        const resetFormStep3 = document.getElementById('reset-form-step3');
+        
+        if (resetFormStep1) {
+            resetFormStep1.addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleResetStep1(e);
+            });
+        }
+        
+        if (resetFormStep2) {
+            resetFormStep2.addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleResetStep2(e);
+            });
+        }
+        
+        if (resetFormStep3) {
+            resetFormStep3.addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleResetStep3(e);
+            });
+        }
         
         // Reset Navigation
-        document.getElementById('back-to-step1').addEventListener('click', function() {
-            showResetStep(1);
-        });
-        document.getElementById('back-to-step2').addEventListener('click', function() {
-            showResetStep(2);
-        });
+        const backToStep1Btn = document.getElementById('back-to-step1');
+        if (backToStep1Btn) {
+            backToStep1Btn.addEventListener('click', function() {
+                showResetStep(1);
+            });
+        }
+        
+        const backToStep2Btn = document.getElementById('back-to-step2');
+        if (backToStep2Btn) {
+            backToStep2Btn.addEventListener('click', function() {
+                showResetStep(2);
+            });
+        }
         
         // Resend OTP
         const resendOtpBtn = document.getElementById('resend-otp');
@@ -1644,7 +1705,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const closeModalBtn = document.querySelector('.close-reset-modal');
         if (closeModalBtn) {
             closeModalBtn.addEventListener('click', function() {
-                resetSuccessModal.classList.remove('active');
+                if (resetSuccessModal) {
+                    resetSuccessModal.classList.remove('active');
+                }
                 showLoginForm();
             });
         }
@@ -1653,16 +1716,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // ====== PAGE NAVIGATION ======
     function showSignupPage(e) {
         e.preventDefault();
-        loginPage.classList.remove('active');
-        signupPage.classList.add('active');
+        if (loginPage) loginPage.classList.remove('active');
+        if (signupPage) signupPage.classList.add('active');
         clearForm(signupForm);
         clearErrors();
     }
 
     function showLoginPage(e) {
         e.preventDefault();
-        signupPage.classList.remove('active');
-        loginPage.classList.add('active');
+        if (signupPage) signupPage.classList.remove('active');
+        if (loginPage) loginPage.classList.add('active');
         clearForm(loginForm);
         clearErrors();
         showLoginForm();
@@ -1674,6 +1737,9 @@ document.addEventListener('DOMContentLoaded', function() {
         clearResetForm();
         resetStep = 1;
         stopOTPTimer();
+        
+        // FIX: Reset to username tab when showing login form
+        switchTab('username');
     }
 
     function showResetPassword(e) {
@@ -1927,87 +1993,61 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1500);
     }
 
-    // ====== LOGIN HANDLER ======
+    // ====== LOGIN HANDLER - FIXED ======
     function handleLogin(e) {
         e.preventDefault();
+        console.log('Login form submitted, currentTab:', currentTab);
         
-        let username, password, remember;
-        const errorPrefix = currentTab === 'username' ? 'username' : 'phone';
+        let username, password;
         
+        // Get credentials based on current tab
         if (currentTab === 'username') {
             username = document.getElementById('username').value.trim();
             password = document.getElementById('username-password').value;
-            remember = document.getElementById('remember-username').checked;
         } else {
             username = document.getElementById('phone').value.trim();
             password = document.getElementById('phone-password').value;
-            remember = document.getElementById('remember-phone').checked;
         }
         
-        const usernameError = document.getElementById(`${errorPrefix}-error`);
-        const passwordError = document.getElementById(`${errorPrefix}-password-error`);
-        
-        let isValid = true;
-        
-        // Clear previous errors
-        clearErrors();
-        
-        // Validate based on tab
-        if (currentTab === 'username') {
-            if (!username) {
-                showError(usernameError, 'Please enter username');
-                isValid = false;
-            }
-        } else {
-            if (!username) {
-                showError(usernameError, 'Please enter phone number');
-                isValid = false;
-            } else if (!validatePhone(username)) {
-                showError(usernameError, 'Please enter a valid phone number');
-                isValid = false;
-            }
+        // Basic validation
+        if (!username) {
+            const errorId = currentTab === 'username' ? 'username-error' : 'phone-error';
+            showError(errorId, `Please enter your ${currentTab}`);
+            return;
         }
         
-        // Validate password
         if (!password) {
-            showError(passwordError, 'Please enter password');
-            isValid = false;
-        } else if (password.length < 6) {
-            showError(passwordError, 'Password must be at least 6 characters');
-            isValid = false;
+            const errorId = currentTab === 'username' ? 'username-password-error' : 'phone-password-error';
+            showError(errorId, 'Please enter your password');
+            return;
         }
-        
-        if (!isValid) return;
         
         // Show loading
-        const submitBtn = e.target.querySelector(`.${currentTab}-login-btn`);
-        showLoading(submitBtn, true);
+        let submitBtn;
+        if (currentTab === 'username') {
+            submitBtn = e.target.querySelector('.username-login-btn');
+        } else {
+            submitBtn = e.target.querySelector('.phone-login-btn');
+        }
         
-        // Simulate login API call
-        setTimeout(() => {
-            showLoading(submitBtn, false);
+        if (submitBtn) {
+            const originalHTML = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<div class="loader small"></div>';
+            submitBtn.disabled = true;
             
-            // For demo purposes - accept any login
-            if (remember) {
-                rememberUser(username, currentTab);
-            } else {
-                clearRememberedUser();
-            }
-            
-            // Show success and redirect
-            if (successModal) {
-                successModal.classList.add('active');
-            }
-            
+            // Simulate login API call
             setTimeout(() => {
-                // Redirect to products page
+                submitBtn.innerHTML = originalHTML;
+                submitBtn.disabled = false;
+                
+                // For demo purposes
                 userData.isLoggedIn = true;
                 userData.name = username;
                 saveUserData();
                 showPage('products');
-            }, 2000);
-            
-        }, 1500);
+                showToastMessage('Login successful!');
+            }, 1500);
+        }
     }
 
     // ====== SIGNUP HANDLER ======
@@ -2162,7 +2202,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (Date.now() - userData.timestamp < oneWeek) {
                     switchTab(userData.type);
                     document.getElementById(userData.type === 'username' ? 'username' : 'phone').value = userData.username;
-                    document.getElementById(`remember-${userData.type}`).checked = true;
+                    const rememberCheckbox = document.getElementById(`remember-${userData.type}`);
+                    if (rememberCheckbox) rememberCheckbox.checked = true;
                 } else {
                     clearRememberedUser();
                 }
@@ -2493,6 +2534,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 break;
             case 'checkout':
                 initializeCheckout();
+                // FIX: Properly initialize checkout steps
+                initializeCheckoutSteps();
                 break;
             case 'login':
                 initializeLoginPage();
@@ -2503,7 +2546,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // ===== SETUP ALL NAVIGATION BUTTONS =====
+    // ===== SETUP ALL NAVIGATION BUTTONS - FIXED =====
     function setupNavigationMenu() {
         // Main navigation menu items
         const navLinks = document.querySelectorAll('nav ul li a');
@@ -2518,35 +2561,71 @@ document.addEventListener('DOMContentLoaded', function() {
                         break;
                     case 'Shop':
                         showPage('products');
-                        // Scroll to products section
-                        const productsGrid = document.querySelector('.products-grid');
-                        if (productsGrid) {
-                            productsGrid.scrollIntoView({ behavior: 'smooth' });
-                        }
+                        // Scroll to products section with header offset
+                        setTimeout(() => {
+                            const productsGrid = document.querySelector('.products-grid');
+                            if (productsGrid) {
+                                const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                                const elementPosition = productsGrid.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                                
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                                });
+                            }
+                        }, 100);
                         break;
                     case 'Categories':
                         showPage('products');
-                        // Scroll to categories section
-                        const categories = document.querySelector('.categories');
-                        if (categories) {
-                            categories.scrollIntoView({ behavior: 'smooth' });
-                        }
+                        // Scroll to categories section with header offset
+                        setTimeout(() => {
+                            const categories = document.querySelector('.categories');
+                            if (categories) {
+                                const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                                const elementPosition = categories.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                                
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                                });
+                            }
+                        }, 100);
                         break;
                     case 'About':
                         showPage('products');
-                        // Scroll to about section
-                        const about = document.querySelector('.about');
-                        if (about) {
-                            about.scrollIntoView({ behavior: 'smooth' });
-                        }
+                        // Scroll to about section with header offset
+                        setTimeout(() => {
+                            const about = document.querySelector('.about');
+                            if (about) {
+                                const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                                const elementPosition = about.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                                
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                                });
+                            }
+                        }, 100);
                         break;
                     case 'Contact':
                         showPage('products');
-                        // Scroll to footer/contact section
-                        const footer = document.querySelector('footer');
-                        if (footer) {
-                            footer.scrollIntoView({ behavior: 'smooth' });
-                        }
+                        // Scroll to footer/contact section with header offset
+                        setTimeout(() => {
+                            const footer = document.querySelector('footer');
+                            if (footer) {
+                                const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                                const elementPosition = footer.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                                
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                                });
+                            }
+                        }, 100);
                         break;
                 }
             });
@@ -2560,11 +2639,18 @@ document.addEventListener('DOMContentLoaded', function() {
             heroShopNow.addEventListener('click', function(e) {
                 e.preventDefault();
                 showPage('products');
-                // Scroll to products section
+                // Scroll to products section with header offset
                 setTimeout(() => {
                     const productsGrid = document.querySelector('.products-grid');
                     if (productsGrid) {
-                        productsGrid.scrollIntoView({ behavior: 'smooth' });
+                        const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                        const elementPosition = productsGrid.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
                     }
                 }, 100);
             });
@@ -2576,11 +2662,18 @@ document.addEventListener('DOMContentLoaded', function() {
             heroLearnMore.addEventListener('click', function(e) {
                 e.preventDefault();
                 showPage('products');
-                // Scroll to about section
+                // Scroll to about section with header offset
                 setTimeout(() => {
                     const about = document.querySelector('.about');
                     if (about) {
-                        about.scrollIntoView({ behavior: 'smooth' });
+                        const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                        const elementPosition = about.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
                     }
                 }, 100);
             });
@@ -2598,25 +2691,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Get category name from overlay
                 const categoryName = this.querySelector('h3').textContent.trim();
                 
-                // Scroll to that category section
+                // Map category names to actual category values
+                const categoryMap = {
+                    'Fresh Fruits': 'Fruits',
+                    'Fresh Vegetables': 'Vegetables',
+                    'Dairy & Eggs': 'Dairy',
+                    'Grains & Pulses': 'Grains',
+                    'Spices & Masalas': 'Spices'
+                };
+                
+                const actualCategory = categoryMap[categoryName] || categoryName;
+                
+                // Filter products by category
                 setTimeout(() => {
-                    if (categoryName.includes('Fruits')) {
-                        const firstH2 = document.querySelector('.container h2:first-child');
-                        if (firstH2) firstH2.scrollIntoView({ behavior: 'smooth' });
-                    } else if (categoryName.includes('Vegetables')) {
-                        const secondH2 = document.querySelector('.container h2:nth-child(2)');
-                        if (secondH2) secondH2.scrollIntoView({ behavior: 'smooth' });
-                    } else if (categoryName.includes('Dairy')) {
-                        const thirdH2 = document.querySelector('.container h2:nth-child(3)');
-                        if (thirdH2) thirdH2.scrollIntoView({ behavior: 'smooth' });
-                    } else if (categoryName.includes('Grains')) {
-                        const fourthH2 = document.querySelector('.container h2:nth-child(4)');
-                        if (fourthH2) fourthH2.scrollIntoView({ behavior: 'smooth' });
-                    } else if (categoryName.includes('Spices')) {
-                        const fifthH2 = document.querySelector('.container h2:nth-child(5)');
-                        if (fifthH2) fifthH2.scrollIntoView({ behavior: 'smooth' });
+                    filterProductsByCategory(actualCategory);
+                    
+                    // Scroll to products section with header offset
+                    const productsGrid = document.querySelector('.products-grid');
+                    if (productsGrid) {
+                        const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                        const elementPosition = productsGrid.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                        
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
                     }
-                }, 5000);
+                }, 100);
             });
         });
     }
@@ -2642,11 +2744,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     showPage('products');
-                    // Scroll to about section
+                    // Scroll to about section with header offset
                     setTimeout(() => {
                         const about = document.querySelector('.about');
                         if (about) {
-                            about.scrollIntoView({ behavior: 'smooth' });
+                            const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                            const elementPosition = about.getBoundingClientRect().top;
+                            const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                            
+                            window.scrollTo({
+                                top: offsetPosition,
+                                behavior: 'smooth'
+                            });
                         }
                     }, 100);
                 });
@@ -2702,7 +2811,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         setTimeout(() => {
                             const productsGrid = document.querySelector('.products-grid');
                             if (productsGrid) {
-                                productsGrid.scrollIntoView({ behavior: 'smooth' });
+                                const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                                const elementPosition = productsGrid.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                                
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                                });
                             }
                         }, 100);
                         break;
@@ -2711,7 +2827,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         setTimeout(() => {
                             const about = document.querySelector('.about');
                             if (about) {
-                                about.scrollIntoView({ behavior: 'smooth' });
+                                const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                                const elementPosition = about.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                                
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                                });
                             }
                         }, 100);
                         break;
@@ -2723,7 +2846,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         setTimeout(() => {
                             const footer = document.querySelector('footer');
                             if (footer) {
-                                footer.scrollIntoView({ behavior: 'smooth' });
+                                const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+                                const elementPosition = footer.getBoundingClientRect().top;
+                                const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+                                
+                                window.scrollTo({
+                                    top: offsetPosition,
+                                    behavior: 'smooth'
+                                });
                             }
                         }, 100);
                         break;
@@ -2827,6 +2957,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Filter products by category
     function filterProductsByCategory(category) {
+        console.log(`Filtering products by category: ${category}`);
+        
         const productCards = document.querySelectorAll('.product-card');
         const categoryFilters = document.querySelectorAll('.category-filter');
         
@@ -2849,6 +2981,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.style.display = 'none';
             }
         });
+        
+        // Show category message
+        const categoryTitle = document.querySelector('.category-title');
+        if (categoryTitle) {
+            if (category === 'all') {
+                categoryTitle.textContent = 'All Products';
+            } else {
+                categoryTitle.textContent = `${category} Products`;
+            }
+        }
+        
+        // Update product count
+        const productCount = document.querySelector('.product-count');
+        if (productCount) {
+            const visibleCount = document.querySelectorAll('.product-card[style="display: block"]').length;
+            productCount.textContent = `${visibleCount} products`;
+        }
+        
+        showToastMessage(`Showing ${category === 'all' ? 'all' : category} products`);
     }
 
     // Sort products
@@ -2898,6 +3049,8 @@ document.addEventListener('DOMContentLoaded', function() {
         productCards.forEach(card => {
             productsContainer.appendChild(card);
         });
+        
+        showToastMessage(`Sorted by ${sortBy.replace('-', ' ')}`);
     }
 
     // Search products
@@ -2971,6 +3124,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize login page specifically
     function initializeLoginPage() {
         console.log('Initializing login page...');
+        
+        // FIX: Set username tab as default
+        switchTab('username');
+        
         // Reset login form state
         const otpSection = document.getElementById('otp-section');
         const getOtpBtn = document.getElementById('get-otp-btn');
@@ -2989,14 +3146,6 @@ document.addEventListener('DOMContentLoaded', function() {
             error.textContent = '';
             error.style.display = 'none';
         });
-        
-        // Set phone tab as default
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
-        const phoneTabBtn = document.querySelector('.tab-btn[data-tab="phone"]');
-        const phoneTab = document.getElementById('phone-tab');
-        if (phoneTabBtn) phoneTabBtn.classList.add('active');
-        if (phoneTab) phoneTab.classList.add('active');
     }
 
     // Initialize signup page specifically
@@ -3025,16 +3174,15 @@ document.addEventListener('DOMContentLoaded', function() {
         setupCouponEvents();
         setupCheckoutEvents();
         setupUPIPaymentEvents();
+        setupFeedbackEvents();
     }
 
-    // ===== LOGIN FUNCTIONALITY =====
+    // ===== LOGIN FUNCTIONALITY - FIXED =====
     function setupLoginEvents() {
         const showSignupLink = document.getElementById('show-signup');
         const loginForm = document.getElementById('login-form');
         const getOtpBtn = document.getElementById('get-otp-btn');
         const loginBtn = document.getElementById('login-btn');
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
         const otpInputs = document.querySelectorAll('.otp-input');
         const resendOtpLink = document.getElementById('resend-otp');
         const socialLoginBtns = document.querySelectorAll('.social-btn');
@@ -3044,7 +3192,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loginForm: !!loginForm,
             getOtpBtn: !!getOtpBtn,
             loginBtn: !!loginBtn,
-            tabBtns: tabBtns.length,
             otpInputs: otpInputs.length
         });
 
@@ -3057,42 +3204,31 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        // Tab switching
-        tabBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tab = this.getAttribute('data-tab');
-                console.log('Switching to tab:', tab);
-                
-                tabBtns.forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                tabContents.forEach(content => {
-                    content.classList.remove('active');
-                    if (content.id === `${tab}-tab`) {
-                        content.classList.add('active');
-                    }
-                });
-            });
-        });
-
-        // Get OTP button
+        // Get OTP button - FIXED with proper validation
         if (getOtpBtn) {
-            getOtpBtn.addEventListener('click', function() {
+            getOtpBtn.addEventListener('click', function(e) {
+                e.preventDefault();
                 console.log('Get OTP clicked');
-                const currentTab = document.querySelector('.tab-btn.active').getAttribute('data-tab');
+                
+                // Get current active tab
+                const activeTabBtn = document.querySelector('.tab-btn.active');
+                const currentTab = activeTabBtn ? activeTabBtn.getAttribute('data-tab') : 'username';
                 let isValid = false;
+                let identifier = '';
                 
                 if (currentTab === 'phone') {
                     const phoneInput = document.getElementById('phone');
-                    if (validatePhone(phoneInput.value)) {
+                    identifier = phoneInput.value.trim();
+                    if (validatePhone(identifier)) {
                         isValid = true;
                         simulateOtpSend('phone');
                     } else {
-                        showError('phone-error', 'Please enter a valid phone number');
+                        showError('phone-error', 'Please enter a valid phone number (10 digits)');
                     }
                 } else {
                     const emailInput = document.getElementById('email');
-                    if (validateEmail(emailInput.value)) {
+                    identifier = emailInput.value.trim();
+                    if (validateEmail(identifier)) {
                         isValid = true;
                         simulateOtpSend('email');
                     } else {
@@ -3109,6 +3245,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // OTP input handling
         otpInputs.forEach((input, index) => {
             input.addEventListener('input', function() {
+                // Only allow numbers
+                if (this.value && !/^\d$/.test(this.value)) {
+                    this.value = '';
+                    return;
+                }
+                
                 if (this.value.length === 1 && index < otpInputs.length - 1) {
                     otpInputs[index + 1].focus();
                 }
@@ -3116,8 +3258,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Check if all OTP fields are filled
                 const allFilled = Array.from(otpInputs).every(input => input.value.length === 1);
                 if (allFilled) {
-                    const loginBtn = document.getElementById('login-btn');
-                    if (loginBtn) loginBtn.style.display = 'block';
+                    if (loginBtn) {
+                        loginBtn.style.display = 'block';
+                        loginBtn.disabled = false;
+                    }
                 }
             });
             
@@ -3144,21 +3288,86 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
 
-        // Login form submission
+        // FIXED: Login form submission - proper handling for both tabs
         if (loginForm) {
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                handleLogin();
+                handleLogin(e);
             });
         }
 
-        // Login button click
-        if (loginBtn) {
-            loginBtn.addEventListener('click', function(e) {
+        // FIXED: Direct login button click handler
+        document.addEventListener('click', function(e) {
+            // Handle username login button
+            if (e.target.id === 'login-btn' || e.target.closest('#login-btn')) {
                 e.preventDefault();
-                handleLogin();
-            });
-        }
+                console.log('Login button clicked');
+                
+                // Get the form data based on current tab
+                let username, password;
+                
+                if (currentTab === 'username') {
+                    username = document.getElementById('username').value.trim();
+                    password = document.getElementById('username-password').value;
+                } else {
+                    username = document.getElementById('phone').value.trim();
+                    password = document.getElementById('phone-password').value;
+                }
+                
+                // Validate inputs
+                if (!username) {
+                    const errorId = currentTab === 'username' ? 'username-error' : 'phone-error';
+                    showError(errorId, `Please enter your ${currentTab}`);
+                    return;
+                }
+                
+                if (!password) {
+                    const errorId = currentTab === 'username' ? 'username-password-error' : 'phone-password-error';
+                    showError(errorId, 'Please enter your password');
+                    return;
+                }
+                
+                // Show loading
+                const loginBtn = document.getElementById('login-btn');
+                if (loginBtn) {
+                    const originalHTML = loginBtn.innerHTML;
+                    loginBtn.innerHTML = '<div class="loader small"></div>';
+                    loginBtn.disabled = true;
+                    
+                    // Simulate login
+                    setTimeout(() => {
+                        loginBtn.innerHTML = originalHTML;
+                        loginBtn.disabled = false;
+                        
+                        // For demo - accept any login
+                        userData.isLoggedIn = true;
+                        userData.name = username;
+                        saveUserData();
+                        showPage('products');
+                        showToastMessage('Login successful!');
+                    }, 1500);
+                }
+            }
+            
+            // Handle username/phone specific login buttons
+            if (e.target.classList.contains('username-login-btn') || e.target.classList.contains('phone-login-btn')) {
+                e.preventDefault();
+                console.log('Tab-specific login button clicked');
+                
+                // Determine which tab we're on
+                const isUsernameTab = e.target.classList.contains('username-login-btn');
+                const tabType = isUsernameTab ? 'username' : 'phone';
+                
+                // Update currentTab
+                currentTab = tabType;
+                
+                // Trigger form submission
+                const loginForm = document.getElementById('login-form');
+                if (loginForm) {
+                    loginForm.dispatchEvent(new Event('submit'));
+                }
+            }
+        });
     }
 
     // ===== SIGNUP FUNCTIONALITY =====
@@ -3188,7 +3397,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (signupForm) {
             signupForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                handleSignup();
+                handleSignup(e);
             });
         }
     }
@@ -3533,26 +3742,201 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Setup checkout steps navigation
         setupCheckoutSteps();
+        
+        // Fix checkout steps display
+        fixCheckoutStepsDisplay();
     }
 
-    function setupCheckoutSteps() {
-        // Step navigation
+    // FIX: Initialize checkout steps properly
+    function initializeCheckoutSteps() {
+        console.log('Initializing checkout steps...');
+        
+        // Get current active step from DOM or default to delivery
+        let activeStep = 'delivery';
+        const visibleStep = document.querySelector('.checkout-step.active');
+        if (visibleStep) {
+            activeStep = visibleStep.id.replace('-step', '');
+        }
+        
+        // Update step indicators
+        updateStepIndicators(activeStep);
+        
+        // Set up event listeners for step navigation
+        setupStepNavigation();
+    }
+
+    // FIX: Update step indicators based on current step
+    function updateStepIndicators(activeStep) {
+        console.log('Updating step indicators for:', activeStep);
+        
+        const steps = document.querySelectorAll('.step');
+        if (!steps || steps.length === 0) return;
+        
+        // Map step names to indices
+        const stepIndexMap = {
+            'delivery': 0,
+            'payment': 1,
+            'confirmation': 2
+        };
+        
+        const activeIndex = stepIndexMap[activeStep] || 0;
+        
+        steps.forEach((step, index) => {
+            // Remove all active classes first
+            step.classList.remove('active');
+            step.classList.remove('completed');
+            
+            // Set active for current step
+            if (index === activeIndex) {
+                step.classList.add('active');
+            }
+            // Set completed for previous steps
+            else if (index < activeIndex) {
+                step.classList.add('completed');
+            }
+            
+            // Update step number styling
+            const stepNumber = step.querySelector('.step-number');
+            if (stepNumber) {
+                if (index === activeIndex) {
+                    stepNumber.style.backgroundColor = '#4CAF50';
+                    stepNumber.style.color = 'white';
+                    stepNumber.style.transform = 'scale(1.1)';
+                } else if (index < activeIndex) {
+                    stepNumber.style.backgroundColor = '#4CAF50';
+                    stepNumber.style.color = 'white';
+                    stepNumber.style.transform = 'scale(1)';
+                } else {
+                    stepNumber.style.backgroundColor = '#e0e0e0';
+                    stepNumber.style.color = '#666';
+                    stepNumber.style.transform = 'scale(1)';
+                }
+            }
+            
+            // Update step label styling
+            const stepLabel = step.querySelector('.step-label');
+            if (stepLabel) {
+                if (index === activeIndex) {
+                    stepLabel.style.color = '#4CAF50';
+                    stepLabel.style.fontWeight = 'bold';
+                } else if (index < activeIndex) {
+                    stepLabel.style.color = '#4CAF50';
+                    stepLabel.style.fontWeight = 'normal';
+                } else {
+                    stepLabel.style.color = '#666';
+                    stepLabel.style.fontWeight = 'normal';
+                }
+            }
+        });
+        
+        // Update progress line (but keep it hidden)
+        updateCheckoutProgressLine(activeIndex, steps.length);
+    }
+
+    // FIX: Update checkout progress line (but keep it hidden)
+    function updateCheckoutProgressLine(activeIndex, totalSteps) {
+        const checkoutSteps = document.querySelector('.checkout-steps');
+        if (!checkoutSteps) return;
+        
+        // Remove existing progress line if any
+        const existingLine = checkoutSteps.querySelector('.progress-line');
+        if (existingLine) existingLine.remove();
+        
+        // Create progress line container but keep it hidden
+        const progressLine = document.createElement('div');
+        progressLine.className = 'progress-line';
+        progressLine.style.cssText = `
+            position: absolute;
+            top: 25px;
+            left: 50px;
+            right: 50px;
+            height: 3px;
+            background: #e0e0e0;
+            z-index: 1;
+            display: none; /* HIDE THE PROGRESS LINE */
+        `;
+        
+        // Calculate progress percentage
+        const progressPercentage = activeIndex / (totalSteps - 1) * 100;
+        
+        // Create filled part
+        const filledLine = document.createElement('div');
+        filledLine.className = 'progress-filled';
+        filledLine.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: ${progressPercentage}%;
+            background: #4CAF50;
+            transition: width 0.5s ease;
+            display: none; /* HIDE THE PROGRESS LINE */
+        `;
+        
+        progressLine.appendChild(filledLine);
+        checkoutSteps.style.position = 'relative';
+        checkoutSteps.appendChild(progressLine);
+    }
+
+    // FIX: Setup step navigation
+    function setupStepNavigation() {
+        // Remove existing event listeners to prevent duplicates
         const nextButtons = document.querySelectorAll('.btn-next');
-        nextButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const nextStep = this.getAttribute('data-next');
-                navigateToStep(nextStep);
-            });
-        });
-
         const prevButtons = document.querySelectorAll('.btn-prev');
-        prevButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const prevStep = this.getAttribute('data-prev');
-                navigateToStep(prevStep);
+        
+        nextButtons.forEach(button => {
+            // Clone and replace to remove existing listeners
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                const nextStep = this.getAttribute('data-next');
+                if (nextStep) {
+                    navigateToStep(nextStep);
+                }
             });
         });
 
+        prevButtons.forEach(button => {
+            // Clone and replace to remove existing listeners
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
+            
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                const prevStep = this.getAttribute('data-prev');
+                if (prevStep) {
+                    navigateToStep(prevStep);
+                }
+            });
+        });
+    }
+
+    function fixCheckoutStepsDisplay() {
+        const checkoutSteps = document.querySelector('.checkout-steps');
+        if (checkoutSteps) {
+            // Ensure checkout steps are visible
+            checkoutSteps.style.display = 'flex';
+            checkoutSteps.style.visibility = 'visible';
+            checkoutSteps.style.opacity = '1';
+            
+            // Ensure steps have proper styling
+            const steps = checkoutSteps.querySelectorAll('.step');
+            steps.forEach(step => {
+                step.style.display = 'flex';
+                step.style.alignItems = 'center';
+                step.style.gap = '8px';
+                step.style.position = 'relative';
+                step.style.zIndex = '2';
+            });
+        }
+    }
+    
+    function setupCheckoutSteps() {
+        // Step navigation is now handled by setupStepNavigation
+        console.log('Checkout steps setup complete');
+        
         // Track order button
         const trackOrderBtn = document.getElementById('track-order');
         if (trackOrderBtn) {
@@ -3854,6 +4238,305 @@ document.addEventListener('DOMContentLoaded', function() {
                     initializeUPIPayment();
                 }
             });
+        }
+        
+        // UPI App Selection functionality
+        const upiApps = document.querySelectorAll('.upi-app');
+        const upiForm = document.getElementById('upi-form');
+        
+        if (upiApps.length > 0) {
+            // Handle UPI app selection
+            upiApps.forEach(app => {
+                const radioInput = app.querySelector('input[type="radio"]');
+                const appValue = app.dataset.app;
+                
+                // Click on entire app div to select
+                app.addEventListener('click', function(e) {
+                    if (e.target.type !== 'radio') {
+                        radioInput.checked = true;
+                        updateSelectedApp();
+                    }
+                });
+                
+                // Handle direct radio click
+                radioInput.addEventListener('change', updateSelectedApp);
+            });
+            
+            function updateSelectedApp() {
+                // Remove selected class from all apps
+                upiApps.forEach(app => {
+                    app.classList.remove('selected');
+                });
+                
+                // Add selected class to the checked app
+                const selectedApp = document.querySelector('input[name="upi-app"]:checked');
+                if (selectedApp) {
+                    const parentAppDiv = selectedApp.closest('.upi-app');
+                    if (parentAppDiv) {
+                        parentAppDiv.classList.add('selected');
+                    }
+                }
+            }
+            
+            // Initialize with Google Pay selected by default
+            updateSelectedApp();
+            
+            // UPI form submission handler
+            if (upiForm) {
+                upiForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const selectedApp = document.querySelector('input[name="upi-app"]:checked');
+                    
+                    if (!selectedApp) {
+                        alert('Please select a UPI app');
+                        return;
+                    }
+                    
+                    // Get payment amount and details
+                    const totals = calculateCartTotals();
+                    const amount = totals.total;
+                    const orderId = generateOrderId();
+                    const merchantId = 'MERCHANT123';
+                    const merchantName = 'Organic Mart';
+                    
+                    // Generate UPI payment link based on selected app
+                    const upiId = 'organicmart@upi';
+                    
+                    let paymentLink = '';
+                    const selectedAppValue = selectedApp.value;
+                    
+                    switch(selectedAppValue) {
+                        case 'gpay':
+                            paymentLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`Payment for Order ${orderId}`)}`;
+                            break;
+                        case 'phonepe':
+                            paymentLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`Payment for Order ${orderId}`)}`;
+                            break;
+                        case 'paytm':
+                            paymentLink = `paytmmp://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`Payment for Order ${orderId}`)}`;
+                            break;
+                        case 'bhim':
+                            paymentLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`Payment for Order ${orderId}`)}`;
+                            break;
+                        case 'amazonpay':
+                            paymentLink = `amazonpay://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`Payment for Order ${orderId}`)}`;
+                            break;
+                        case 'any':
+                            paymentLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`Payment for Order ${orderId}`)}`;
+                            break;
+                        default:
+                            paymentLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(merchantName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`Payment for Order ${orderId}`)}`;
+                    }
+                    
+                    // Show loading/processing message
+                    showPaymentProcessing(selectedAppValue);
+                    
+                    // Simulate payment processing
+                    simulateUPIPaymentProcessing(paymentLink, amount, orderId);
+                });
+            }
+        }
+        
+        function generateOrderId() {
+            return 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
+        }
+        
+        // Show payment processing status
+        function showPaymentProcessing(appName) {
+            // Create overlay
+            const overlay = document.createElement('div');
+            overlay.className = 'payment-overlay';
+            overlay.innerHTML = `
+                <div class="payment-processing">
+                    <div class="spinner"></div>
+                    <h3>Redirecting to ${getAppDisplayName(appName)}...</h3>
+                    <p>Please complete the payment in your UPI app</p>
+                    <p class="processing-time">This may take a few moments</p>
+                    <button class="btn-cancel-payment">Cancel Payment</button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            
+            // Add styles for overlay
+            const style = document.createElement('style');
+            style.textContent = `
+                .payment-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                }
+                
+                .payment-processing {
+                    background: white;
+                    padding: 30px;
+                    border-radius: 10px;
+                    text-align: center;
+                    max-width: 400px;
+                    width: 90%;
+                }
+                
+                .spinner {
+                    border: 4px solid #f3f3f3;
+                    border-top: 4px solid #3498db;
+                    border-radius: 50%;
+                    width: 50px;
+                    height: 50px;
+                    animation: spin 1s linear infinite;
+                    margin: 0 auto 20px;
+                }
+                
+                @keyframes spin {
+                    0% { transform: rotate(0deg); }
+                    100% { transform: rotate(360deg); }
+                }
+                
+                .payment-processing h3 {
+                    margin-bottom: 10px;
+                    color: #333;
+                }
+                
+                .payment-processing p {
+                    color: #666;
+                    margin-bottom: 5px;
+                }
+                
+                .processing-time {
+                    font-size: 0.9em;
+                    color: #888;
+                }
+                
+                .btn-cancel-payment {
+                    margin-top: 20px;
+                    padding: 10px 20px;
+                    background: #e74c3c;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
+                }
+                
+                .btn-cancel-payment:hover {
+                    background: #c0392b;
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Cancel button handler
+            overlay.querySelector('.btn-cancel-payment').addEventListener('click', function() {
+                document.body.removeChild(overlay);
+                document.head.removeChild(style);
+            });
+        }
+        
+        // Get display name for UPI app
+        function getAppDisplayName(appCode) {
+            const appNames = {
+                'gpay': 'Google Pay',
+                'phonepe': 'PhonePe',
+                'paytm': 'Paytm',
+                'bhim': 'BHIM',
+                'amazonpay': 'Amazon Pay',
+                'any': 'Super Money'
+            };
+            return appNames[appCode] || 'UPI App';
+        }
+        
+        // Simulate payment processing (Replace this with actual payment gateway integration)
+        function simulateUPIPaymentProcessing(paymentLink, amount, orderId) {
+            console.log('UPI Payment initiated:', {
+                app: document.querySelector('input[name="upi-app"]:checked').value,
+                amount: amount,
+                orderId: orderId,
+                paymentLink: paymentLink
+            });
+            
+            // For demo purposes, show payment link and simulate redirect
+            setTimeout(() => {
+                const overlay = document.querySelector('.payment-overlay');
+                if (overlay) {
+                    overlay.querySelector('.payment-processing').innerHTML = `
+                        <h3>Payment Link Generated</h3>
+                        <p>Amount: ₹${amount.toFixed(2)}</p>
+                        <p>Order: ${orderId}</p>
+                        <div style="margin: 20px 0;">
+                            <a href="${paymentLink}" class="btn-open-app" style="display: inline-block; padding: 12px 24px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; margin: 10px;">Open in App</a>
+                            <button class="btn-copy-link" style="padding: 12px 24px; background: #2196F3; color: white; border: none; border-radius: 5px; margin: 10px; cursor: pointer;">Copy Link</button>
+                        </div>
+                        <div style="margin-top: 20px;">
+                            <p style="font-size: 0.9em; color: #666;">Or scan this QR code:</p>
+                            <div id="qr-code" style="margin: 15px auto; width: 150px; height: 150px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                                <span style="color: #999;">QR Code for: ${paymentLink.substring(0, 30)}...</span>
+                            </div>
+                        </div>
+                        <button class="btn-cancel" style="margin-top: 20px; padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                    `;
+                    
+                    // Add event listeners for new buttons
+                    overlay.querySelector('.btn-copy-link').addEventListener('click', function() {
+                        navigator.clipboard.writeText(paymentLink).then(() => {
+                            alert('Payment link copied to clipboard!');
+                        });
+                    });
+                    
+                    overlay.querySelector('.btn-cancel').addEventListener('click', function() {
+                        document.body.removeChild(overlay);
+                        document.head.removeChild(style);
+                    });
+                    
+                    // Simulate payment verification after 5 seconds
+                    setTimeout(() => {
+                        simulatePaymentVerification(orderId);
+                    }, 5000);
+                }
+            }, 2000);
+        }
+        
+        // Simulate payment verification
+        function simulatePaymentVerification(orderId) {
+            const overlay = document.querySelector('.payment-overlay');
+            if (overlay) {
+                // For demo, simulate successful payment 80% of the time
+                const isSuccess = Math.random() > 0.2;
+                
+                if (isSuccess) {
+                    overlay.querySelector('.payment-processing').innerHTML = `
+                        <div style="color: #4CAF50; font-size: 48px; margin-bottom: 20px;">✓</div>
+                        <h3>Payment Successful!</h3>
+                        <p>Order ID: ${orderId}</p>
+                        <p>Thank you for your purchase!</p>
+                        <p>You will receive a confirmation email shortly.</p>
+                        <button class="btn-continue" style="margin-top: 20px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Continue Shopping</button>
+                    `;
+                } else {
+                    overlay.querySelector('.payment-processing').innerHTML = `
+                        <div style="color: #e74c3c; font-size: 48px; margin-bottom: 20px;">✗</div>
+                        <h3>Payment Failed</h3>
+                        <p>Order ID: ${orderId}</p>
+                        <p>Your payment was not completed. Please try again.</p>
+                        <button class="btn-try-again" style="margin-top: 20px; padding: 10px 20px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer; margin-right: 10px;">Try Again</button>
+                        <button class="btn-cancel" style="padding: 10px 20px; background: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">Cancel</button>
+                    `;
+                    
+                    overlay.querySelector('.btn-try-again').addEventListener('click', function() {
+                        document.body.removeChild(overlay);
+                        document.head.removeChild(style);
+                    });
+                }
+                
+                overlay.querySelector('.btn-continue, .btn-cancel').addEventListener('click', function() {
+                    document.body.removeChild(overlay);
+                    document.head.removeChild(style);
+                });
+            }
         }
     }
 
@@ -4265,6 +4948,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (loader) loader.style.display = 'none';
                 if (failed) failed.style.display = 'block';
                 
+                // Reset UPI payment flag on failure
+                if (paymentType === 'upi') {
+                    upiPaymentInProgress = false;
+                }
+                    
                 const errorMessages = {
                     'card': 'Payment was declined by your bank.',
                     'upi': 'UPI transaction failed. Please try again.',
@@ -4276,11 +4964,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     errorMessageElement.textContent = errorMessages[paymentType] || 'Payment failed. Please try again.';
                 }
                 
-                // Reset UPI payment flag on failure
-                if (paymentType === 'upi') {
-                    upiPaymentInProgress = false;
-                }
-                    
                 // Allow retry
                 const retryPaymentBtn = document.getElementById('retry-payment');
                 if (retryPaymentBtn) {
@@ -4331,7 +5014,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Generate delivery details based on order
         const deliveryDetails = generateDeliveryDetails(order);
         
-        // Create tracking modal with numbered steps
+        // Create tracking modal with numbered steps (NO PROGRESS LINE)
         const modalHtml = `
             <div class="modal" id="tracking-modal" style="display: flex;">
                 <div class="modal-content" style="max-width: 800px; max-height: 90vh; overflow-y: auto;">
@@ -4353,16 +5036,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                 </div>
                             </div>
                             
-                            <!-- NUMBERED TRACKING STEPS -->
+                            <!-- NUMBERED TRACKING STEPS WITHOUT PROGRESS LINE -->
                             <div class="tracking-steps-container" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
                                 <h4 style="color: #2e7d32; margin-bottom: 25px; display: flex; align-items: center; gap: 10px;">
                                     <i class="fas fa-map-marker-alt"></i> Order Tracking Status
                                 </h4>
                                 
                                 <div class="numbered-tracking-steps" style="position: relative;">
-                                    <!-- Progress line -->
-                                    <div style="position: absolute; left: 40px; top: 40px; width: calc(100% - 80px); height: 3px; background: linear-gradient(90deg, #4CAF50 ${(deliveryDetails.currentStep/deliveryDetails.statuses.length)*100}%, #e0e0e0 ${(deliveryDetails.currentStep/deliveryDetails.statuses.length)*100}%);"></div>
-                                    
                                     ${deliveryDetails.statuses.map((step, index) => {
                                         const isCompleted = index <= deliveryDetails.currentStep;
                                         const isCurrent = index === deliveryDetails.currentStep;
@@ -4750,15 +5430,19 @@ document.addEventListener('DOMContentLoaded', function() {
         if (itemIndex === -1) return;
         
         const item = userData.cart[itemIndex];
-        item.quantity += change;
         
-        if (item.quantity <= 0) {
+        // Check if quantity would go below 1
+        if (item.quantity + change < 1) {
+            // Remove the item instead of going to 0
             removeFromCart(productId);
-        } else {
-            saveUserData();
-            renderCart();
-            updateCartCount();
+            return;
         }
+        
+        item.quantity += change;
+        saveUserData();
+        renderCart();
+        updateCartCount();
+        showToastMessage(`${item.name} quantity updated to ${item.quantity}`);
     }
 
     function removeFromCart(productId) {
@@ -4899,14 +5583,59 @@ document.addEventListener('DOMContentLoaded', function() {
                     <span>-₹${totals.couponDiscount.toFixed(2)}</span>
                 </div>
             ` : ''}
-            <div class="coupon-section">
-                <div class="coupon-input">
-                    <input type="text" id="coupon-code" placeholder="Enter coupon code" value="${activeCoupon ? activeCoupon.code : ''}">
-                    <button id="apply-coupon">${activeCoupon ? 'Change' : 'Apply'}</button>
-                    ${activeCoupon ? '<button id="remove-coupon" style="margin-left: 10px;">Remove</button>' : ''}
+            <div class="coupon-section" style="margin-top: 16px;">
+                <div class="coupon-input" style="display: flex; align-items: center; gap: 10px;">
+
+                    <input 
+                        type="text"
+                        id="coupon-code"
+                        placeholder="Enter coupon code"
+                        value="${activeCoupon ? activeCoupon.code : ''}"
+                        style="
+                            height: 48px;
+                            width: 150px;
+                            padding: 0 14px;
+                            font-size: 15px;
+                            border-radius: 8px;
+                            border: 1px solid #ccc;
+                        "
+                    >
+
+                    <button 
+                        id="apply-coupon"
+                        style="
+                            height: 48px;
+                            padding: 0 22px;
+                            font-size: 15px;
+                            font-weight: 600;
+                            border-radius: 8px;
+                            cursor: pointer;
+                        "
+                    >
+                        ${activeCoupon ? 'Change' : 'Apply'}
+                    </button>
+
+                    ${activeCoupon ? `
+                    <button 
+                        id="remove-coupon"
+                        style="
+                            height: 48px;
+                            padding: 0 18px;
+                            font-size: 15px;
+                            font-weight: 600;
+                            border-radius: 8px;
+                            margin-left: 8px;
+                            cursor: pointer;
+                        "
+                    >
+                        Remove
+                    </button>` : ''}
+
                 </div>
+
                 <div id="coupon-message" class="coupon-message"></div>
             </div>
+
             <div class="summary-row total">
                 <span>Total</span>
                 <span id="cart-total">₹${totals.total.toFixed(2)}</span>
@@ -5394,6 +6123,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // FIX: Properly navigate between checkout steps with step indicator updates
     function navigateToStep(step) {
         console.log('Navigating to step:', step);
         
@@ -5405,22 +6135,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Update steps
-        const steps = document.querySelectorAll('.step');
-        steps.forEach(s => s.classList.remove('active'));
-        
-        const currentStep = document.querySelector(`.step[data-step="${step}"]`);
-        if (currentStep) {
-            currentStep.classList.add('active');
-        }
-        
-        // Update content
+        // Hide all checkout steps
         const checkoutSteps = document.querySelectorAll('.checkout-step');
-        checkoutSteps.forEach(s => s.classList.remove('active'));
+        checkoutSteps.forEach(stepElement => {
+            stepElement.classList.remove('active');
+        });
         
-        const currentContent = document.getElementById(`${step}-step`);
-        if (currentContent) {
-            currentContent.classList.add('active');
+        // Show the selected step
+        const currentStepElement = document.getElementById(`${step}-step`);
+        if (currentStepElement) {
+            currentStepElement.classList.add('active');
+            
+            // Update step indicators
+            updateStepIndicators(step);
+            
+            // Scroll to top of the step
+            currentStepElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     }
 
@@ -5800,6 +6530,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 const modal = e.target.closest('.modal');
                 if (modal) {
                     modal.style.display = 'none';
+                    // FIX: Prevent multiple event handlers
+                    e.stopPropagation();
                 }
             }
             
@@ -5808,9 +6540,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 hideQuickView();
             }
             
-            // Close modal when clicking outside
+            // Close modal when clicking outside - FIXED to work with one click
             if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
+                // Check if it's a modal that should close on outside click
+                if (!e.target.classList.contains('no-close-outside')) {
+                    e.target.style.display = 'none';
+                }
             }
         });
         
@@ -6347,11 +7082,226 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.style.overflow = 'auto';
     }
 
+    // ===== FEEDBACK SYSTEM FUNCTIONALITY =====
+    function setupFeedbackEvents() {
+        // Marquee button click handler
+        if (marqueeBtn) {
+            marqueeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openFeedbackModal();
+            });
+        }
+
+        // Close feedback modal
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', closeFeedbackModal);
+        }
+
+        // Close modal when clicking outside
+        if (feedbackModal) {
+            feedbackModal.addEventListener('click', function(e) {
+                if (e.target === feedbackModal) {
+                    closeFeedbackModal();
+                }
+            });
+        }
+
+        // Close modal with escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && feedbackModal && feedbackModal.style.display === 'block') {
+                closeFeedbackModal();
+            }
+        });
+
+        // Character counter for feedback message
+        if (messageTextarea && charCount) {
+            messageTextarea.addEventListener('input', function() {
+                const length = this.value.length;
+                charCount.textContent = `${length}/500 characters`;
+                
+                // Add warning style when approaching limit
+                if (length > 450) {
+                    charCount.style.color = '#ff9800';
+                } else if (length > 480) {
+                    charCount.style.color = '#f44336';
+                } else {
+                    charCount.style.color = '#666';
+                }
+                
+                // Limit to 500 characters
+                if (length > 500) {
+                    this.value = this.value.substring(0, 500);
+                    charCount.textContent = '500/500 characters (maximum reached)';
+                    charCount.style.color = '#f44336';
+                }
+            });
+        }
+
+        // Rating buttons functionality
+        if (ratingButtons.length > 0) {
+            ratingButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const rating = this.getAttribute('data-rating');
+                    
+                    // Remove active class from all buttons
+                    ratingButtons.forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    
+                    // Set hidden input value
+                    if (ratingInput) {
+                        ratingInput.value = rating;
+                    }
+                    
+                    // Add visual feedback
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 150);
+                });
+            });
+        }
+
+        // Form submission handler
+        if (feedbackForm) {
+            feedbackForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Validate required fields
+                const message = document.getElementById('message').value.trim();
+                if (!message) {
+                    alert('Please enter your feedback message.');
+                    document.getElementById('message').focus();
+                    return;
+                }
+                
+                // Get form data
+                const formData = {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    feedbackType: feedbackType.value,
+                    message: message,
+                    rating: ratingInput ? ratingInput.value : '',
+                    timestamp: new Date().toISOString()
+                };
+                
+                // Disable submit button and show loading state
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                        </svg>
+                        Submitting...
+                    `;
+                }
+                
+                // Simulate API call with timeout
+                setTimeout(() => {
+                    // In a real application, you would send this data to your server
+                    console.log('Feedback submitted:', formData);
+                    
+                    // Show success message
+                    if (feedbackSuccess) {
+                        document.getElementById('feedbackFormContainer').style.display = 'none';
+                        feedbackSuccess.style.display = 'block';
+                    }
+                    
+                    // Reset button
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                            </svg>
+                            Submit Feedback
+                        `;
+                    }
+                }, 1500);
+            });
+        }
+
+        // Close success message
+        if (closeSuccessBtn) {
+            closeSuccessBtn.addEventListener('click', function() {
+                if (feedbackSuccess) {
+                    feedbackSuccess.style.display = 'none';
+                }
+                document.getElementById('feedbackFormContainer').style.display = 'block';
+                closeFeedbackModal();
+                resetForm();
+            });
+        }
+    }
+
+    // Open feedback modal
+    function openFeedbackModal() {
+        if (feedbackModal) {
+            feedbackModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Reset form
+            resetFeedbackForm();
+            
+            // Focus on first input
+            setTimeout(() => {
+                const firstInput = feedbackForm.querySelector('input, textarea, select');
+                if (firstInput) firstInput.focus();
+            }, 100);
+        }
+    }
+
+    // Close feedback modal
+    function closeFeedbackModal() {
+        if (feedbackModal) {
+            feedbackModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    // Reset feedback form function
+    function resetFeedbackForm() {
+        if (feedbackForm) {
+            feedbackForm.reset();
+            if (ratingInput) {
+                ratingInput.value = '';
+            }
+            
+            // Reset rating buttons
+            ratingButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Reset character counter
+            if (charCount) {
+                charCount.textContent = '0/500 characters';
+                charCount.style.color = '#666';
+            }
+            
+            // Show form and hide success message
+            document.getElementById('feedbackFormContainer').style.display = 'block';
+            if (feedbackSuccess) {
+                feedbackSuccess.style.display = 'none';
+            }
+        }
+    }
+
     // ===== UTILITY FUNCTIONS =====
     function scrollToSection(sectionId) {
         const section = document.getElementById(sectionId);
         if (section) {
-            section.scrollIntoView({ behavior: 'smooth' });
+            const headerHeight = document.querySelector('header')?.offsetHeight || 80;
+            const elementPosition = section.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
+            
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
         }
     }
 
@@ -6472,6 +7422,112 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Add CSS fixes for scrolling and checkout steps
+    function addScrollFixStyles() {
+        if (!document.querySelector('#scroll-fix-styles')) {
+            const style = document.createElement('style');
+            style.id = 'scroll-fix-styles';
+            style.textContent = `
+                /* Ensure header offset for smooth scrolling */
+                html {
+                    scroll-padding-top: 100px;
+                }
+                
+                /* Fix for checkout steps display */
+                .checkout-steps {
+                    display: flex !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    justify-content: space-between;
+                    margin-bottom: 30px;
+                    padding: 20px;
+                    background: #f8f9fa;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                    position: relative;
+                }
+                
+                .checkout-steps .step {
+                    display: flex !important;
+                    align-items: center;
+                    gap: 10px;
+                    flex: 1;
+                    position: relative;
+                    padding: 10px;
+                    transition: all 0.3s ease;
+                    z-index: 2;
+                }
+                
+                .checkout-steps .step .step-number {
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: #e0e0e0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: #666;
+                    font-weight: bold;
+                    z-index: 2;
+                    transition: all 0.3s ease;
+                    border: 2px solid white;
+                }
+                
+                .checkout-steps .step.active .step-number {
+                    background: #4CAF50;
+                    color: white;
+                    transform: scale(1.1);
+                }
+                
+                .checkout-steps .step.completed .step-number {
+                    background: #4CAF50;
+                    color: white;
+                }
+                
+                .checkout-steps .step .step-label {
+                    font-weight: 500;
+                    color: #666;
+                    transition: all 0.3s ease;
+                }
+                
+                .checkout-steps .step.active .step-label {
+                    color: #4CAF50;
+                    font-weight: bold;
+                }
+                
+                .checkout-steps .step.completed .step-label {
+                    color: #4CAF50;
+                }
+                
+                /* Progress line - HIDDEN */
+                .progress-line {
+                    display: none !important;
+                }
+                
+                .progress-filled {
+                    display: none !important;
+                }
+                
+                /* Ensure checkout container is properly visible */
+                .checkout-container {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: block !important;
+                }
+                
+                /* Fix for modal close buttons */
+                .modal-close, .modal-cancel {
+                    cursor: pointer;
+                }
+                
+                .modal-close:hover, .modal-cancel:hover {
+                    opacity: 0.8;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
     function showToastMessage(message) {
         // Remove existing toast if any
         const existingToast = document.querySelector('.toast-notification');
@@ -6573,6 +7629,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 resetSuccessModal.classList.remove('active');
                 showLoginForm();
             }
+            
+            // Close any open modals
+            document.querySelectorAll('.modal[style*="display: flex"], .modal[style*="display: block"]').forEach(modal => {
+                modal.style.display = 'none';
+            });
         }
         
         // Enter key submits forms
@@ -6601,27 +7662,40 @@ document.addEventListener('DOMContentLoaded', function() {
     init();
 });
 
-// Add global modal close functionality
+// Add global modal close functionality - FIXED to work with single click
 document.addEventListener('DOMContentLoaded', function() {
-    // Close modals when clicking X
-    document.querySelectorAll('.modal-close').forEach(closeBtn => {
-        closeBtn.addEventListener('click', function() {
-            const modal = this.closest('.modal');
+    // Use event delegation for modal close buttons
+    document.addEventListener('click', function(e) {
+        // Close modals when clicking X
+        if (e.target.classList.contains('modal-close') || e.target.closest('.modal-close')) {
+            const closeBtn = e.target.classList.contains('modal-close') ? e.target : e.target.closest('.modal-close');
+            const modal = closeBtn.closest('.modal');
             if (modal) {
                 modal.style.display = 'none';
                 document.body.style.overflow = 'auto';
+                e.stopPropagation();
             }
-        });
-    });
-    
-    // Close modals when clicking outside
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                this.style.display = 'none';
+        }
+        
+        // Close modals when clicking cancel buttons
+        if (e.target.classList.contains('modal-cancel') || e.target.closest('.modal-cancel')) {
+            const cancelBtn = e.target.classList.contains('modal-cancel') ? e.target : e.target.closest('.modal-cancel');
+            const modal = cancelBtn.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                e.stopPropagation();
+            }
+        }
+        
+        // Close modals when clicking outside (only if not clicking on modal content)
+        if (e.target.classList.contains('modal')) {
+            // Check if we're clicking directly on the modal backdrop (not on modal content)
+            if (e.target === e.currentTarget) {
+                e.target.style.display = 'none';
                 document.body.style.overflow = 'auto';
             }
-        });
+        }
     });
     
     // Close modals with escape key
