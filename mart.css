@@ -7566,3 +7566,17 @@ textarea:focus {
         color: #333333 !important;
     }
 }
+/* FORCE LIGHT MODE – BUT KEEP ORIGINAL COLORS */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: #ffffff !important;
+        color: #333333 !important;
+    }
+
+    /* IMPORTANT: buttons, links, cards ni touch cheyyadu */
+    *:not(button):not(.btn):not(a) {
+        background-color: initial !important;
+        color: initial !important;
+        border-color: initial !important;
+    }
+}
