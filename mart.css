@@ -6865,7 +6865,7 @@ textarea:focus {
     position: fixed;
     top: 0;
     left: 0;
-   
+    width: 100vw;
     height: 100vh;
     background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(4px);
@@ -6878,7 +6878,7 @@ textarea:focus {
 }
 
 .feedback-modal-content {
-  
+    width: 100vw;
     height: 100vh;
     background: #ffffff;
     padding: 36px 32px;
