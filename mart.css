@@ -7261,3 +7261,154 @@ img {
   height: auto;
   display: block;
 }
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    overflow-x: hidden; /* Prevents horizontal scrolling */
+}
+
+/* Mobile-first responsive approach */
+.container {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 15px; /* Add padding on sides */
+}
+
+/* Responsive typography */
+body {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+h1 { font-size: 2rem; }
+h2 { font-size: 1.75rem; }
+h3 { font-size: 1.5rem; }
+
+/* Responsive images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Flexbox for flexible layouts */
+.flex-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows items to wrap on small screens */
+    gap: 15px;
+}
+
+.flex-item {
+    flex: 1 1 100%; /* Full width on mobile by default */
+}
+
+/* Grid for responsive layouts */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+/* Mobile (default) - up to 767px */
+/* Your base styles work here */
+
+/* Tablet - 768px and up */
+@media (min-width: 768px) {
+    .container {
+        max-width: 750px;
+        padding: 0 20px;
+    }
+    
+    .flex-item {
+        flex: 1 1 48%; /* Two columns on tablet */
+    }
+    
+    body {
+        font-size: 17px;
+    }
+    
+    h1 { font-size: 2.25rem; }
+    h2 { font-size: 2rem; }
+}
+
+/* Desktop - 992px and up */
+@media (min-width: 992px) {
+    .container {
+        max-width: 970px;
+    }
+    
+    .flex-item {
+        flex: 1 1 30%; /* Three columns on desktop */
+    }
+    
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 2.25rem; }
+}
+
+/* Large Desktop - 1200px and up */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1170px;
+    }
+}
+/* Prevent text from being too small on mobile */
+p, li, span, a {
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+/* Make buttons touch-friendly on mobile */
+button, 
+.btn,
+input[type="submit"] {
+    min-height: 44px; /* Minimum touch target size */
+    padding: 10px 20px;
+    font-size: 1rem;
+}
+
+/* Navigation menu for mobile */
+.nav-menu {
+    display: flex;
+    flex-direction: column; /* Stack items vertically on mobile */
+    width: 100%;
+}
+
+/* Hamburger menu toggle (example) */
+.menu-toggle {
+    display: block; /* Show on mobile */
+}
+
+/* Hide on mobile, show on desktop */
+.desktop-only {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .menu-toggle {
+        display: none; /* Hide on desktop */
+    }
+    
+    .desktop-only {
+        display: block;
+    }
+    
+    .nav-menu {
+        flex-direction: row; /* Horizontal on desktop */
+    }
+}
+
+/* Form elements mobile optimization */
+input, 
+textarea, 
+select {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+    width: 100%;
+    max-width: 100%;
+}
+
