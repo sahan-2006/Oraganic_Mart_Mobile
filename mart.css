@@ -7553,3 +7553,16 @@ textarea:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(46,125,50,0.35);
 }
+/* FORCE LIGHT MODE – DISABLE DARK MODE COMPLETELY */
+@media (prefers-color-scheme: dark) {
+    * {
+        background-color: initial !important;
+        color: initial !important;
+        border-color: initial !important;
+    }
+
+    body {
+        background: #ffffff !important;
+        color: #333333 !important;
+    }
+}
