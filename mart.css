@@ -7227,48 +7227,6 @@ button {
     background-color: inherit;
     color: inherit;
 }
-/* ===============================
-   GLOBAL SPACING REDUCTION
-=============================== */
-
-/* Section gap reduce */
-section {
-  padding-top: 40px;
-  padding-bottom: 40px;
-}
-
-/* Headings gap */
-section h2,
-section h3 {
-  margin-bottom: 20px;
-}
-
-/* Paragraph spacing */
-section p {
-  margin-bottom: 20px;
-}
-
-/* Cards / grids gap reduce */
-.products-grid,
-.category-grid,
-.features {
-  gap: 16px;
-}
-
-/* Card padding reduce */
-.product-card,
-.category-card,
-.feature-card {
-  padding: 14px;
-}
-
-/* Remove unnecessary large margins */
-.shop-section,
-.category-section,
-.products-section {
-  margin-top: 40px;
-  margin-bottom: 40px;
-}
 @media (max-width: 768px) {
 
   section {
